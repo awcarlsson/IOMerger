@@ -1,0 +1,96 @@
+##############
+##############
+MERGER PROGRAM
+##############
+##############
+
+
+The merger program creates output tables based on instructions from the output configuration file, along with checking the data that makes up these output tables by comparing forms listed in the input configuration file.
+
+ # The outputs of this program will be:
+
+        1. One table (a CSV file) for each output table listed in the output config file
+        2. A CSV file titled 'discrepancies.csv'. This contains all of the discrepancies between the input forms which are used to create the output tables.
+        3. A text file titled 'error_log.txt'. This file will contain all errors encountered while running the program, along with messages for each. Errors can occur when the input and output configuration files are created incorrectly.
+
+To run the program, enter the following into the terminal:
+
+        python merger_rebuild [list of input files file name] [input config file name] [output config file name]
+
+
+##############
+####Inputs####
+##############
+
+
+To run the program, an input and an output config file are needed, along with a list of form directories.
+
+
+ # An output configuration file (CSV) is needed which contains the following columns:
+
+        1. 'output_tn': This column contains the name of the output table. All rows corresponding to a unique variable name ('output_cn') must be assigned an output table.
+        2. 'output_cn': This column contains each variable name that will be exported to the output table.
+        3. 'key_column': This column contains the names of variables that will be used as key columns. Key columns are identifying columns used to compare different visits across forms (e.g. participant ID, visit number, etc.)
+        4. 'output_display_order': This column contains the numerical order in which variables will appear in the output table. All unique variable names ('output_cn') must contain a numerical value in this column.
+
+
+ # An input configuration file (CSV) is needed which contains the following columns:
+
+        1. 'output_tn': This column contains the name of the output table. As in the output config, all rows corresponding to a unique variable name ('output_cn') must be assigned an output table.
+        2. 'output_cn': This column contains variable names. There will often be duplicates in this column, as variables can come from multiple forms.
+        3. 'input_form_name': This column contains the name of the input form from which each variable ('output_cn') in its row came from. If the same 'output_cn' is included in two or more rows, each row will have a unique 'input_form_name'.
+        4. 'form_precedence': This column contains the precedence for each form. If one form has higher precedence than another, then the value contained in the form with the highest precedence will be exported to the output table. Precedence is determined by numerical values, with 1 being the highest, 2 the second highest, etc. All forms must be assigned a precedence value.
+        5. 'input_field_name': This column contains the name of the 'output_cn' in its row as stated in the input form in its row.
+        6. 'date_markers': This column contains keywords used to identify date, day, month, and year variables across forms. If an output column relates to a visit date, the string 'date' should appear in the corresponding row and 'date_markers' column. If it relates to a visit day, 'day' should be entered, for a visit month, 'month', and for a visit year, 'year'.
+        7. 'comparison_type': This column can contain a rule when comparing the values for a certain 'output_cn'. This string is used to determine how to compare the values from different forms. If left blank, the program will compare strictly on string equality.
+
+
+# A text file containing the locations of the input forms is needed which contains each input form name and its directory on each new line, formatted like so:
+
+        [uds version]|[form name]|[form directory]
+
+        For example, the WADRC C1_1 form would be listed as:
+
+        uds2|wadrc_c1_1|/mounts/data/preprocessed/datafreeze/neuropsych/raw_data_np_20190530_nacc_download_R_code_redcap_pull/uds2_wadrc_c1_1_matched.csv
+
+
+Examples of all three of these forms should be contained in this directory, titled 'example_input.csv', 'example_output.csv', and 'example_list_of_files.txt'.
+
+
+##############
+##Additional##
+#####Info#####
+##############
+
+
+# Format of 'discrepancies.csv'
+
+        'Discrepancies.csv' contains a list of all discrepancies encountered between forms for a certain output variable/column. Each row corresponds to a new discrepancy. The columns are as follows:
+
+        1. 'output_tn': This column contains the name of the output table that the 'output_cn' was being used to create.
+        2. 'output_cn': This column contains the name of the output variable/column in which the discrepancy was found.
+        3. Key values: The next few columns contain the key values for the discrepancy, such as participant ID and visit number. These are used to compare the unique output variable across forms.
+        4. Form names: The final columns each have the name of a different form. The values contained in these columns represent the value for the 'output_cn' as stated in each form. At least two of these forms will have different values, as a discrepancy has been found.
+
+        Note: Any discrepancies will result in the cell in the output table corresponding to this variable being filled in with 'discrep'.
+
+
+# Setting comparison rules
+
+        Rules can be created and entered in the 'comparison_type' column in the input configuration file which will test input variables for equality in different ways than strict string comparison. Above the start of the program, a method titled 'has_discrepancy_after_rule' exists which has the arguments of two variables and a rule. In this method one can add additional rules and then set up a way to compare the two variables using this rule. If the values do not have discrepancies after the rule, return False. The variables passed in will always be different based on strict string equality, so by default it returns True (a discrepancy exists).
+
+        LIST OF CURRENT RULES
+
+        1. Date rules: if two given date variables are within a certain time period of each other, there is no discrepancy.
+
+                Format: 'date_' + [# of units of time] + '_' + [units of time]
+
+                Examples: 'date_90_day' - dates within 90 days of each other are considered OK
+                          'date_6_month' - within 6 months OK (a month is classified as 30 days)
+                          'date_2_year' - within 2 years OK (a year is classified as 365 days)
+
+        2. Float/int comparison: Strings which contain decimals such as .0 or .00 should be classified as the same as a string without the trailing decimal
+
+                Format: 'compare_value_int'
+
+                Example: 1 compared against 1.0 should not return a discrepancy
