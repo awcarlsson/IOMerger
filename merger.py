@@ -208,8 +208,7 @@ def process_date_markers(input_config_specific_tn):
             has_dmy_vars = False
         # if the forms which contain day, month, and year variables differ, throw an error, as if a form has one of these variables it should have all of the others
         elif ((forms_with_day_var != forms_with_month_var) | (forms_with_day_var != forms_with_year_var)):
-            raise Exception ('Forms with date information in seperate columns must have a column for day, month, and year. One or more of these columns are missing. Forms with columns for days: ' + str(forms_with_day_var) + '
-Forms with columns for months: ' + str(forms_with_month_var) + ' Forms with columns for years: ' + str(forms_with_year_var))
+            raise Exception ('Forms with date information in seperate columns must have a column for day, month, and year. One or more of these columns are missing. Forms with columns for days: ' + str(forms_with_day_var) + ' Forms with columns for months: ' + str(forms_with_month_var) + ' Forms with columns for years: ' + str(forms_with_year_var))
         # if all forms contain one of each day, month, and year variable, create a date variable for them if they don't already have one
         else:
             has_dmy_vars = True
@@ -219,8 +218,7 @@ Forms with columns for months: ' + str(forms_with_month_var) + ' Forms with colu
             forms_with_only_date_var = list(set(forms_with_date_var).difference(set(forms_with_day_var)))
             # cycle through all of the forms with just day, month, and year variables and create date variable columns for them
             for form_name in forms_with_only_dmy_var:
-                input_files_dict[form_name] = convert_dmy_to_date(form_name, input_files_dict[form_name].copy(), form_name_to_day_var_dict[form_name], form_name_to_month_var_dict[form_name], form_name_to_year_var_dict[form_nam
-e])
+                input_files_dict[form_name] = convert_dmy_to_date(form_name, input_files_dict[form_name].copy(), form_name_to_day_var_dict[form_name], form_name_to_month_var_dict[form_name], form_name_to_year_var_dict[form_name])
             # cycle through all of the forms with just a date variable and create day, month, and year variable columns for them
             for form_name in forms_with_only_date_var:
                 input_files_dict[form_name] = convert_date_to_day(form_name, input_files_dict[form_name].copy(), form_name_to_date_var_dict[form_name])
@@ -295,8 +293,7 @@ def create_dataframes_for_each_form(unique_form_rows, key_values, table_name):
             if(form_df is not None):
                 form_dataframes.update({unique_form_row['input_form_name']:form_df})
     except Exception as e:
-        log_error('Error: One of the variables: ' +  ', '.join(str(x) for x in converted_key_values_list) + ' is not contained in the form \'' + unique_form_row['input_form_name'] + '\'. Column \'' + unique_form_row['output_cn
-'] + '\' can not be compared across forms', e.message, False)
+        log_error('Error: One of the variables: ' +  ', '.join(str(x) for x in converted_key_values_list) + ' is not contained in the form \'' + unique_form_row['input_form_name'] + '\'. Column \'' + unique_form_row['output_cn'] + '\' can not be compared across forms', e.message, False)
         # if everything went smoothly, a DataFrame will have been created which contains all of the key values and unique column for a specific form. Add this to the list.
     return form_dataframes
 
