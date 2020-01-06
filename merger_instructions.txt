@@ -4,6 +4,7 @@ MERGER PROGRAM
 ##############
 ##############
 
+## Author: Anders Carlsson / awcarlsson@wisc.edu
 
 The merger program creates output tables based on instructions from the output configuration file, along with checking the data that makes up these output tables by comparing forms listed in the input configuration file.
 
